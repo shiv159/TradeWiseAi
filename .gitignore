@@ -31,3 +31,16 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Configuration Files ###
+# Ignore application.properties with sensitive data
+src/main/resources/application.properties
+src/main/resources/application-*.properties
+
+### Database ###
+# MongoDB data directory
+/data/
+
+### Logs ###
+logs/
+*.log

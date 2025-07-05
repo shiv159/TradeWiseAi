@@ -1,0 +1,22 @@
+spring.application.name=tradewiseai
+
+# MongoDB Configuration
+spring.data.mongodb.uri=mongodb://localhost:27017/tradewise-db
+spring.data.mongodb.database=tradewise-db
+
+# AlphaVantage API Configuration
+tradewise.alpha-vantage.api-key=YOUR_API_KEY_HERE
+tradewise.alpha-vantage.base-url=https://www.alphavantage.co/query
+tradewise.alpha-vantage.symbol-suffix=.BSE
+tradewise.alpha-vantage.timeout-seconds=30
+
+# Cache Configuration
+tradewise.cache.ttl-minutes=60
+tradewise.cache.enabled=true
+
+# Cosmos DB Configuration (disabled by default)
+tradewise.cosmos-db.enabled=false
+tradewise.cosmos-db.endpoint=
+tradewise.cosmos-db.key=
+tradewise.cosmos-db.database-name=tradewise-db
+tradewise.cosmos-db.container-name=stock-data

@@ -20,3 +20,18 @@ tradewise.cosmos-db.endpoint=
 tradewise.cosmos-db.key=
 tradewise.cosmos-db.database-name=tradewise-db
 tradewise.cosmos-db.container-name=stock-data
+
+# MCP Server Configuration
+tradewise.mcp.server-name=TradeWise-MCP
+tradewise.mcp.server-version=1.0.0
+tradewise.mcp.server-description=MCP server for TradeWise AI stock analysis
+tradewise.mcp.port=8082
+tradewise.mcp.enabled=true
+
+# MCP Tools Configuration
+tradewise.mcp.tools.historical-analysis=true
+tradewise.mcp.tools.technical-analysis=true
+tradewise.mcp.tools.current-price=true
+tradewise.mcp.tools.stock-search=true
+tradewise.mcp.tools.max-data-points=1000
+tradewise.mcp.tools.default-analysis-days=30

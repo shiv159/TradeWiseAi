@@ -26,6 +26,10 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.HashMap;
 
 @Service
 @Slf4j
@@ -236,5 +240,130 @@ public class TradeWiseService {
             
             return "Latest RSI: " + latestRsi + ", Latest SMA: " + latestSma;
         });
+    }
+
+    /**
+     * Performs enhanced technical analysis for MCP server integration
+     */
+    public Mono<Map<String, Object>> getEnhancedTechnicalAnalysis(String symbol) {
+        log.info("Performing enhanced technical analysis for MCP server: {}", symbol);
+        
+        return stockDataRepository.findByStockSymbolAndDataType(symbol, "HISTORICAL")
+                .filter(this::isDataFresh)
+                .switchIfEmpty(fetchAndCacheHistoricalPrice(symbol).then(
+                        stockDataRepository.findByStockSymbolAndDataType(symbol, "HISTORICAL")))
+                .flatMap(stockData -> {
+                    return Mono.fromCallable(() -> {
+                        if (stockData.getDailyData().isEmpty()) {
+                            Map<String, Object> errorResult = new HashMap<>();
+                            errorResult.put("error", "No historical data available");
+                            return errorResult;
+                        }
+                        
+                        BarSeries series = new BaseBarSeries("mcp_analysis");
+                        
+                        // Convert to TA4J format
+                        for (DailyData dailyData : stockData.getDailyData()) {
+                            Bar bar = new BaseBar(
+                                    Duration.ofDays(1),
+                                    ZonedDateTime.of(dailyData.getDate().atStartOfDay(), 
+                                                   java.time.ZoneId.systemDefault()),
+                                    dailyData.getOpenPrice(),
+                                    dailyData.getHighPrice(),
+                                    dailyData.getLowPrice(),
+                                    dailyData.getClosePrice(),
+                                    new BigDecimal(dailyData.getVolume())
+                            );
+                            series.addBar(bar);
+                        }
+                        
+                        return calculateAllTechnicalIndicators(series, stockData.getStockSymbol());
+                    });
+                })
+                .onErrorResume(e -> {
+                    log.error("Error in enhanced technical analysis for symbol: {}", symbol, e);
+                    Map<String, Object> errorResult = new HashMap<>();
+                    errorResult.put("error", "Analysis failed: " + e.getMessage());
+                    return Mono.just(errorResult);
+                });
+    }
+    
+    /**
+     * Calculates comprehensive technical indicators for MCP server
+     */
+    private Map<String, Object> calculateAllTechnicalIndicators(BarSeries series, String symbol) {
+        Map<String, Object> indicators = new HashMap<>();
+        
+        try {
+            ClosePriceIndicator closePrice = new ClosePriceIndicator(series);
+            
+            // RSI
+            RSIIndicator rsi = new RSIIndicator(closePrice, 14);
+            indicators.put("rsi", rsi.getValue(series.getEndIndex()).doubleValue());
+            
+            // Simple Moving Averages
+            SMAIndicator sma14 = new SMAIndicator(closePrice, 14);
+            SMAIndicator sma50 = new SMAIndicator(closePrice, 50);
+            indicators.put("sma14", sma14.getValue(series.getEndIndex()).doubleValue());
+            if (series.getBarCount() >= 50) {
+                indicators.put("sma50", sma50.getValue(series.getEndIndex()).doubleValue());
+            }
+            
+            // Current price info
+            Bar lastBar = series.getLastBar();
+            indicators.put("currentPrice", lastBar.getClosePrice().doubleValue());
+            indicators.put("volume", lastBar.getVolume().longValue());
+            indicators.put("high", lastBar.getHighPrice().doubleValue());
+            indicators.put("low", lastBar.getLowPrice().doubleValue());
+            indicators.put("open", lastBar.getOpenPrice().doubleValue());
+            
+            // Analysis metadata
+            indicators.put("symbol", symbol);
+            indicators.put("dataPoints", series.getBarCount());
+            indicators.put("lastUpdated", LocalDateTime.now().toString());
+            
+            // Trading signals
+            double rsiValue = rsi.getValue(series.getEndIndex()).doubleValue();
+            indicators.put("signal", generateTradingSignal(rsiValue));
+            indicators.put("trend", determineTrend(rsiValue, 
+                    sma14.getValue(series.getEndIndex()).doubleValue(),
+                    lastBar.getClosePrice().doubleValue()));
+            
+        } catch (Exception e) {
+            log.error("Error calculating technical indicators", e);
+            indicators.put("error", "Calculation failed: " + e.getMessage());
+        }
+        
+        return indicators;
+    }
+    
+    private String generateTradingSignal(double rsi) {
+        if (rsi > 70) {
+            return "SELL - RSI indicates overbought conditions";
+        } else if (rsi < 30) {
+            return "BUY - RSI indicates oversold conditions";
+        } else if (rsi > 50) {
+            return "HOLD/WEAK_BUY - RSI indicates slight bullish momentum";
+        } else {
+            return "HOLD/WEAK_SELL - RSI indicates slight bearish momentum";
+        }
+    }
+    
+    private String determineTrend(double rsi, double sma, double currentPrice) {
+        if (rsi > 70) {
+            return "OVERBOUGHT";
+        } else if (rsi < 30) {
+            return "OVERSOLD";
+        } else if (currentPrice > sma * 1.02) {
+            return "STRONG_BULLISH";
+        } else if (currentPrice > sma) {
+            return "BULLISH";
+        } else if (currentPrice < sma * 0.98) {
+            return "STRONG_BEARISH";
+        } else if (currentPrice < sma) {
+            return "BEARISH";
+        } else {
+            return "NEUTRAL";
+        }
     }
 }

@@ -36,11 +36,12 @@ public class AlphaVantageServiceCaller {
     }
 
     private String buildUrl(String function, String symbol) {
-        return String.format("%s?function=%s&symbol=%s%s&apikey=%s",
+        return String.format("%s?function=%s&symbol=%s%s&outputsize=%s&apikey=%s",
                 tradeWiseProps.getAlphaVantage().getBaseUrl(),
                 function,
                 symbol,
                 tradeWiseProps.getAlphaVantage().getSymbolSuffix(),
+                tradeWiseProps.getAlphaVantage().getOutputSize(),
                 tradeWiseProps.getAlphaVantage().getApiKey());
     }
 }

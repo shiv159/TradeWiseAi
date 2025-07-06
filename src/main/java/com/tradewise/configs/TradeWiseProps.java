@@ -19,6 +19,7 @@ public class TradeWiseProps {
         private String baseUrl = "https://www.alphavantage.co/query";
         private String symbolSuffix = ".BSE";
         private int timeoutSeconds = 30;
+        private String outputSize = "full";
     }
     
     @Data

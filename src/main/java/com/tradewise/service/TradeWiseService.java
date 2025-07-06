@@ -21,6 +21,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.ZonedDateTime;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.time.Duration;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -129,8 +130,9 @@ public class TradeWiseService {
             return false;
         }
         
-        LocalDateTime cutoff = LocalDateTime.now().minusMinutes(tradeWiseProps.getCache().getTtlMinutes());
+        LocalDateTime cutoff = LocalDateTime.now().minusDays(tradeWiseProps.getCache().getTtlMinutes());
         return stockData.getLastUpdated().isAfter(cutoff);
+
     }
     
     private Mono<String> convertToCurrentPriceResponse(StockData stockData) {

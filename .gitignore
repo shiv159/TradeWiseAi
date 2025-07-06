@@ -36,6 +36,8 @@ build/
 # Ignore application.properties with sensitive data
 src/main/resources/application.properties
 src/main/resources/application-*.properties
+# Keep template files
+!src/main/resources/application.properties.template
 
 ### Database ###
 # MongoDB data directory

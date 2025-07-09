@@ -3,10 +3,25 @@ spring:
     mcp:
       server:
         enabled: true
-        port: 8082
-        name: TradeWise-MCP
+        port: 8080
+        name: tradewiseai
         version: 1.0.0
         description: MCP server for TradeWise AI stock analysis
       client:
         enabled: true
-        base-url: http://localhost:8082 
+        base-url: http://localhost:8080
+        sse:
+          connections:
+            tradewiseai:
+              url: http://localhost:8080
+ 
+  data:
+    mongodb:
+      uri: mongodb://admin:password123@localhost:27017/tradewise-db?authSource=admin
+      database: tradewise-db
+tradewise:
+  alpha-vantage:
+    api-key: GVEHOPEGR246WG8B
+    base-url: https://www.alphavantage.co/query
+    symbol-suffix: .BSE
+    timeout-seconds: 30 

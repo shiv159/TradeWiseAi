@@ -1,0 +1,12 @@
+spring:
+  ai:
+    mcp:
+      server:
+        enabled: true
+        port: 8082
+        name: TradeWise-MCP
+        version: 1.0.0
+        description: MCP server for TradeWise AI stock analysis
+      client:
+        enabled: true
+        base-url: http://localhost:8082 

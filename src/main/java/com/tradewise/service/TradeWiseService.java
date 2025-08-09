@@ -28,8 +28,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
-import java.util.Map;
-import java.util.HashMap;
 
 @Service
 @Slf4j
@@ -133,7 +131,7 @@ public class TradeWiseService {
             return false;
         }
         
-        LocalDateTime cutoff = LocalDateTime.now().minusDays(tradeWiseProps.getCache().getTtlMinutes());
+    LocalDateTime cutoff = LocalDateTime.now().minusMinutes(tradeWiseProps.getCache().getTtlMinutes());
         return stockData.getLastUpdated().isAfter(cutoff);
 
     }

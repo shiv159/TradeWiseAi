@@ -18,9 +18,15 @@ public interface StockDataRepository extends ReactiveMongoRepository<StockData, 
     
     Mono<Boolean> existsByStockSymbolAndDataType(String stockSymbol, String dataType);
     
-    // Custom method to save or update existing data
+    // Custom method to save or update existing data (preserve id when present)
     default Mono<StockData> saveOrUpdate(StockData stockData) {
-        return this.deleteByStockSymbolAndDataType(stockData.getStockSymbol(), stockData.getDataType())
-                .then(this.save(stockData));
+        return this.findByStockSymbolAndDataType(stockData.getStockSymbol(), stockData.getDataType())
+                .defaultIfEmpty(stockData)
+                .flatMap(existing -> {
+                    if (existing.getId() != null && existing != stockData) {
+                        stockData.setId(existing.getId());
+                    }
+                    return this.save(stockData);
+                });
     }
 }

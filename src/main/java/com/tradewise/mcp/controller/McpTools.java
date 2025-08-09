@@ -1,9 +1,12 @@
 package com.tradewise.mcp.controller;
 
+import com.tradewise.mcp.dto.TechnicalAnalysisResult;
 import com.tradewise.mcp.service.McpAnalysisService;
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.ai.tool.annotation.ToolParam;
 import org.springframework.stereotype.Component;
+
+import java.time.Duration;
 
 @Component
 public class McpTools {
@@ -14,29 +17,29 @@ public class McpTools {
     }
 
     @Tool(name = "technical_analysis", description = "Performs comprehensive technical analysis on a stock symbol")
-    public String technicalAnalysis(@ToolParam(description = "Stock symbol to analyze") String symbol) {
-        return mcpAnalysisService.performTechnicalAnalysis(symbol).block();
+    public TechnicalAnalysisResult technicalAnalysis(@ToolParam(description = "Stock symbol to analyze") String symbol) {
+        return mcpAnalysisService.performTechnicalAnalysis(symbol).block(Duration.ofSeconds(30));
     }
 
     @Tool(name = "historical_analysis", description = "Retrieves historical stock data with technical indicators")
     public String historicalAnalysis(@ToolParam(description = "Stock symbol to analyze") String symbol,
                                      @ToolParam(description = "Number of days of historical data to retrieve") Integer days) {
-        return mcpAnalysisService.getHistoricalAnalysis(symbol, days).block();
+        return mcpAnalysisService.getHistoricalAnalysis(symbol, days).block(Duration.ofSeconds(30));
     }
 
     @Tool(name = "advanced_analysis", description = "Performs advanced pattern recognition and market sentiment analysis")
     public String advancedAnalysis(@ToolParam(description = "Stock symbol to analyze") String symbol,
                                    @ToolParam(description = "Number of days for analysis") Integer days) {
-        return mcpAnalysisService.performAdvancedAnalysis(symbol, days).block();
+        return mcpAnalysisService.performAdvancedAnalysis(symbol, days).block(Duration.ofSeconds(15));
     }
 
     @Tool(name = "current_price", description = "Gets current stock price and basic information")
     public String currentPrice(@ToolParam(description = "Stock symbol to get current price for") String symbol) {
-        return mcpAnalysisService.getCurrentPriceFormatted(symbol).block();
+        return mcpAnalysisService.getCurrentPriceFormatted(symbol).block(Duration.ofSeconds(15));
     }
 
     @Tool(name = "search_stocks", description = "Searches for stock symbols based on query")
     public String searchStocks(@ToolParam(description = "Search query for stock symbols") String query) {
-        return mcpAnalysisService.searchStocksFormatted(query).block();
+        return mcpAnalysisService.searchStocksFormatted(query).block(Duration.ofSeconds(15));
     }
 } 
